@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# funcion para ver quien gana
+quiengana() {
+    local jugador=$1
+    local cpu=$2
+
+    if [[ $jugador == $cpu ]]; then
+        echo "Empate"
+    elif [[ ($jugador == "piedra" && $cpu == "tijeras") || 
+            ($jugador == "papel" && $cpu == "piedra") || 
+            ($jugador == "tijeras" && $cpu == "papel") ]]; then
+        echo "Jugador"
+    else
+        echo "CPU"
+    fi
+}
+
+# fucnion apra la seleccion de la cpu
+cpu() {
+    local aleatorio=$((RANDOM % 3))
+    case $aleatorio in
+        0) echo "piedra" ;;
+        1) echo "papel" ;;
+        2) echo "tijeras" ;;
+    esac
+}
+
+# la cpu en imposible
+cpu_impo() {
+    local jugador=$1
+    case $jugador in
+        "piedra") echo "papel" ;;
+        "papel") echo "tijeras" ;;
+        "tijeras") echo "piedra" ;;
+        *) echo "papel" ;; # si la entrada es invalida papel
+    esac
+}
+
+# funcion para las rondas
+jugar() {
+    local modo=$1
+    local jugador cpu ganador
+
+    echo "Elige: piedra, papel o tijeras:"
+    read jugador
+
+    jugador=$(echo "$jugador")
+
+    if [[ $jugador != "piedra" && $jugador != "papel" && $jugador != "tijeras" ]]; then
+        echo "Tonto tienes que poner piedra papel o tijera no tonterias."
+        return
+    fi
+
+    if [[ $modo == "Imposible" ]]; then
+        cpu=$(cpu_impo $jugador)
+    else
+        cpu=$(cpu)
+    fi
+
+    echo "Jugador eligió: $jugador"
+    echo "CPU eligió: $cpu"
+
+    ganador=$(quiengana $jugador $cpu)
+    echo "Resultado: $ganador gana esta ronda"
+
+    if [[ $ganador == "Jugador" ]]; then
+        puntos_j=$((puntos_j + 1))
+    elif [[ $ganador == "CPU" ]]; then
+        puntos_c=$((puntos_c + 1))
+    fi
+}
+
+# A la mejor de 5 modo
+5() {
+    puntos_j=0
+    puntos_c=0
+
+    while [[ $puntos_j -lt 3 && $puntos_c -lt 3 ]]; do
+        jugar "Normal"
+        echo "Marcador - Jugador: $puntos_j, CPU: $puntos_c"
+    done
+
+    if [[ $puntos_j -eq 3 ]]; then
+        echo "¡Jugador gana el juego!"
+    else
+        echo "¡CPU gana el juego!"
+    fi
+}
+
+#Modo infinito
+infinito() {
+    puntos_j=0
+    puntos_c=0
+
+    while true; do
+        jugar "Normal"
+        echo "Marcador - Jugador: $puntos_j, CPU: $puntos_c"
+    done
+}
+
+# Modo imposible
+imposible() {
+    puntos_j=0
+    puntos_c=0
+
+    while true; do
+        jugar "Imposible"
+        echo "Marcador - Jugador: $puntos_j, CPU: $puntos_c"
+    done
+}
+
+# Menu
+echo "Welcome to el videogame de piedra, papel, tijeras"
+echo "Elige un modo de juego:"
+echo "1. Mejor de 5"
+echo "2. Modo Infinito"
+echo "3. Modo Imposible"
+read opcion
+
+case $opcion in
+    1) 5 ;;
+    2) infinito ;;
+    3) imposible ;;
+    *) echo "Opción no válida" ;;
+esac
